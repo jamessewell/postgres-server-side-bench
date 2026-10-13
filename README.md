@@ -29,8 +29,8 @@ The lines are unsmoothed, aligned one-second buckets from sequential 30-second
 runs with eight concurrent clients. They were calculated from 194,906 raw
 client-observed query durations in the k6 dashboard export; the legend values
 are unsmoothed full-run results. k6 reported a p50 of 3.639ms for TIN versus
-1.633ms for ParadeDB. At latencies this small, the extra network time on TIN's
-path materially changed the result.
+1.633ms for ParadeDB. At latencies this small, we suspected the extra network time on TIN's
+path materially changed the result. Planetscale had also reported throughput of around 10K qps for this workload.
 
 The same client-side run measured about 2,028 queries per second for TIN, well
 below the roughly 10,000 queries per second reported in the
