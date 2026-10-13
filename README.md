@@ -144,7 +144,7 @@ controls.
   --backend paradedb \
   --url 'postgres://postgres:postgres@127.0.0.1:45432/benchmark' \
   --termset datasets/stackexchange/queries.json \
-  --clients 32 \
+  --clients 8 \
   --jobs 8 \
   --duration 60 \
   --mode both \
@@ -158,7 +158,7 @@ TIN:
   --backend tin \
   --url "$TIN_URL" \
   --termset datasets/stackexchange/queries.json \
-  --clients 32 \
+  --clients 8 \
   --jobs 8 \
   --duration 60 \
   --query-style mixed \
@@ -200,7 +200,7 @@ make -C local-timed run \
   BACKEND=paradedb \
   DATABASE_URL='postgres://postgres:postgres@127.0.0.1:45432/benchmark' \
   TERMSET=../datasets/stackexchange/queries.json \
-  MODE=both CLIENTS=32 JOBS=8 DURATION=60 QUERY_STYLE=mixed
+  MODE=both CLIENTS=8 JOBS=8 DURATION=60 QUERY_STYLE=mixed
 ```
 
 `DATABASE_URL` may be omitted when the matching existing `TIN_URL` or
