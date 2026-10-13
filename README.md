@@ -14,16 +14,44 @@ series:
 
 Our main tool is the
 [ParadeDB Benchmarker](https://github.com/paradedb/benchmarker), which is based
-on k6. We did not use its normal client-timed k6 runner for this comparison
-because PlanetScale makes TIN available only as a managed service. Comparing a
-remote TIN service with a locally hosted ParadeDB container would otherwise
-include two different network paths in the measurements. For the COUNT tests
-in particular even the p99 measurements are under 4ms, so 1ms of lag makes a
-difference.
+on k6. PlanetScale created a fork of that tool, and we later pulled its useful
+features back into the main repository. We did not use its normal client-timed
+k6 runner for this comparison because PlanetScale makes TIN available only as a
+managed service. Comparing a remote TIN service with a locally hosted ParadeDB
+container would otherwise include two different network paths in the
+measurements.
+
+That problem showed up clearly in a client-side Wikipedia `COUNT` run:
+
+![Line graph of client-observed Wikipedia COUNT p50 latency, with ParadeDB near 1.6ms and TIN near 3.6ms](docs/client-observed-wikipedia-count-p50.svg)
+
+The lines are unsmoothed, aligned one-second buckets from sequential 30-second
+runs with eight concurrent clients. They were calculated from 194,906 raw
+client-observed query durations in the k6 dashboard export; the legend values
+are unsmoothed full-run results. k6 reported a p50 of 3.639ms for TIN versus
+1.633ms for ParadeDB. At latencies this small, the extra network time on TIN's
+path materially changed the result.
+
+The same client-side run measured about 2,028 queries per second for TIN, well
+below the roughly 10,000 queries per second reported in the
+[TIN launch post](https://planetscale.com/blog/introducing-tin). We could not
+identify the reason for that gap, but it reinforced that the client-side setup
+was not a fair basis for comparing the search engines. PlanetScale can avoid
+this asymmetry in its own tests because it can run both systems locally;
+`pg_search` is open source, while we can access TIN only through its managed
+service.
 
 This harness instead runs and times the search loop inside each PostgreSQL
 server. That keeps the comparison focused on TIN versus `pg_search`, excluding
-client/server round trips from the reported throughput and latency.
+client/server round trips from the reported throughput and latency. The final
+ratios changed very little after moving to server-side timing, but the
+measurement no longer systematically penalizes TIN for higher network latency
+and jitter.
+
+This repository is published separately for reproducibility. It is a
+purpose-built tool rather than a replacement for the main benchmarker, and we
+do not expect to maintain it indefinitely. A dedicated server-side benchmarking
+extension would be a better long-term home for this approach.
 
 The standalone `pgbench` + PL/pgSQL harness uses the repository's existing
 `queries.json` termsets or flat JSON string arrays and drives real PostgreSQL
